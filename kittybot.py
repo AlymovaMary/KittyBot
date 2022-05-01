@@ -1,7 +1,16 @@
+import requests
+from glob import glob
+import random
 from telegram.ext import Updater, Filters, MessageHandler, CommandHandler
 from telegram import ReplyKeyboardMarkup
 
 updater = Updater(token='5319551654:AAHSis0zie9WyYC1_p1W1xR4t0YQKR2kzJU')
+URL = 'https://api.thecatapi.com/v1/images/search'
+
+def get_new_image():
+    response = requests.get(URL).json()
+    random_cat = response[0].get('url')
+    return random_cat
 
 def say_hi(update, context):
     # Получаем информацию о чате, из которого пришло сообщение,
@@ -12,21 +21,75 @@ def say_hi(update, context):
     context.bot.send_message(chat_id=chat.id, text='Привет, я SimbaBot!')
 
 def wake_up(update, context):
-    # В ответ на команду /start 
-    # будет отправлено сообщение 'Спасибо, что включили меня'
     chat = update.effective_chat
     name = update.message.chat.first_name
     buttons = ReplyKeyboardMarkup([
-                ['Показать Синдбада Морекота', 'Показать Дизеля'],
-                ['Показать Глашу', 'Показать Эйву'],
-                ['Показать Плюшу', 'Показать случайного ]
-            ])
+                ['/Simba', '/Dizel'],
+                ['/Glasha', 'Показать Эйву'],
+                ['/Plusha', '/RandomCat']])
     context.bot.send_message(
         chat_id=chat.id,
-        text='Теперь я буду жить у тебя в телефоне, {}!'.format(name),
+        text='Хочешь я покажу тебе котиков, {}!'.format(name),
         reply_markup=buttons  
         )
+
+def simba_cat():
+    lists = glob('Simba/*')  # создаем список из названий картинок
+    picture = random.choice(lists)  # берем из списка одну картинку
+    return picture
+
+def new_simba(update, context):
+    chat = update.effective_chat
+    context.bot.send_photo(chat.id, photo=open(simba_cat(),  'rb'))
+
+def dizel_cat():
+    lists = glob('Dizel/*')  # создаем список из названий картинок
+    picture = random.choice(lists)  # берем из списка одну картинку
+    return picture
+
+def new_dizel(update, context):
+    chat = update.effective_chat
+    context.bot.send_photo(chat.id, photo=open(dizel_cat(),  'rb'))
+
+def plusha_cat():
+    lists = glob('Plusha/*')  # создаем список из названий картинок
+    picture = random.choice(lists)  # берем из списка одну картинку
+    return picture
+
+def new_plusha(update, context):
+    chat = update.effective_chat
+    context.bot.send_photo(chat.id, photo=open(plusha_cat(),  'rb'))
+
+def glasha_cat():
+    lists = glob('Glasha/*')  # создаем список из названий картинок
+    picture = random.choice(lists)  # берем из списка одну картинку
+    return picture
+
+def new_glasha(update, context):
+    chat = update.effective_chat
+    context.bot.send_photo(chat.id, photo=open(glasha_cat(),  'rb'))
+
+def aiva_cat():
+    lists = glob('Aiva/*')  # создаем список из названий картинок
+    picture = random.choice(lists)  # берем из списка одну картинку
+    return picture
+
+def new_aiva(update, context):
+    chat = update.effective_chat
+    context.bot.send_photo(chat.id, photo=open(aiva_cat(),  'rb'))
+
+
+def new_cat(update, context):
+    chat = update.effective_chat
+    context.bot.send_photo(chat.id, get_new_image())
+
 updater.dispatcher.add_handler(CommandHandler('start', wake_up))
+updater.dispatcher.add_handler(CommandHandler('RandomCat', new_cat))
+updater.dispatcher.add_handler(CommandHandler('Simba', new_simba))
+updater.dispatcher.add_handler(CommandHandler('Dizel', new_dizel))
+updater.dispatcher.add_handler(CommandHandler('Plusha', new_plusha))
+updater.dispatcher.add_handler(CommandHandler('Glasha', new_glasha))
+updater.dispatcher.add_handler(CommandHandler('Aiva', new_aiva))
 
 updater.dispatcher.add_handler(MessageHandler(Filters.text, say_hi))
 
