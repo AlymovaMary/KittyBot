@@ -1,13 +1,25 @@
 import requests
+import os
+from dotenv import load_dotenv
 from glob import glob
 import random
 from telegram.ext import Updater, Filters, MessageHandler, CommandHandler
 from telegram import ReplyKeyboardMarkup
 
-updater = Updater(token='5319551654:AAHSis0zie9WyYC1_p1W1xR4t0YQKR2kzJU')
+load_dotenv()
+
+auth_token = os.getenv('TOKEN')
+account_sid = os.getenv('ACCOUNT_SID')
+
 URL = 'https://api.thecatapi.com/v1/images/search'
 
 def get_new_image():
+    try:
+        response = requests.get(URL)
+    except Exception as error:
+        print(error)      
+        new_url = 'https://api.thedogapi.com/v1/images/search'
+        response = requests.get(new_url)
     response = requests.get(URL).json()
     random_cat = response[0].get('url')
     return random_cat
@@ -25,7 +37,7 @@ def wake_up(update, context):
     name = update.message.chat.first_name
     buttons = ReplyKeyboardMarkup([
                 ['/Simba', '/Dizel'],
-                ['/Glasha', 'Показать Эйву'],
+                ['/Glasha', '/Aiva'],
                 ['/Plusha', '/RandomCat']])
     context.bot.send_message(
         chat_id=chat.id,
@@ -83,16 +95,21 @@ def new_cat(update, context):
     chat = update.effective_chat
     context.bot.send_photo(chat.id, get_new_image())
 
-updater.dispatcher.add_handler(CommandHandler('start', wake_up))
-updater.dispatcher.add_handler(CommandHandler('RandomCat', new_cat))
-updater.dispatcher.add_handler(CommandHandler('Simba', new_simba))
-updater.dispatcher.add_handler(CommandHandler('Dizel', new_dizel))
-updater.dispatcher.add_handler(CommandHandler('Plusha', new_plusha))
-updater.dispatcher.add_handler(CommandHandler('Glasha', new_glasha))
-updater.dispatcher.add_handler(CommandHandler('Aiva', new_aiva))
+def main():
 
-updater.dispatcher.add_handler(MessageHandler(Filters.text, say_hi))
+    updater = Updater(token=auth_token)
 
-updater.start_polling()
-# Бот будет работать до тех пор, пока не нажмете Ctrl-C
-updater.idle() 
+    updater.dispatcher.add_handler(CommandHandler('start', wake_up))
+    updater.dispatcher.add_handler(CommandHandler('RandomCat', new_cat))
+    updater.dispatcher.add_handler(CommandHandler('Simba', new_simba))
+    updater.dispatcher.add_handler(CommandHandler('Dizel', new_dizel))
+    updater.dispatcher.add_handler(CommandHandler('Plusha', new_plusha))
+    updater.dispatcher.add_handler(CommandHandler('Glasha', new_glasha))
+    updater.dispatcher.add_handler(CommandHandler('Aiva', new_aiva))
+    updater.dispatcher.add_handler(MessageHandler(Filters.text, say_hi))
+
+    updater.start_polling()
+    updater.idle() 
+
+if __name__ == '__main__':
+    main() 
